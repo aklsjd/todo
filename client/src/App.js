@@ -1,26 +1,21 @@
-import { useState, useRef } from "react";
-import AddTodo from "./components/AddTodo";
-import Todo from "./components/Todo";
+import { useState, useRef, useEffect } from 'react';
+import axios from 'axios';
+import AddTodo from './components/AddTodo';
+import Todo from './components/Todo';
+import './styles/App.scss';
 
 const App = () => {
-  const [todoItems, setTodoItems] = useState([
-    {
-      id: 1,
-      title: "My Todo1",
-      done: false,
-    },
-    {
-      id: 2,
-      title: "My Todo2",
-      done: false,
-    },
-    {
-      id: 3,
-      title: "My Todo3",
-      done: true,
-    },
-  ]);
+  const [todoItems, setTodoItems] = useState([]);
   const todoId = useRef(4);
+
+  useEffect(() => {
+    console.log('첫 랜더링 완료!');
+    const getTodos = async () => {
+      let response = await axios.get('http://localhost:8080/todos');
+      setTodoItems(response.data);
+    };
+    getTodos();
+  }, []);
 
   // AddTodo 컴포넌트는 상위 컴포넌트(App)의 todoItems(state)에 접근 불가능
   // 상위 컴포넌트(App)은 AddTodo 컴포넌트 접근 가능
@@ -42,11 +37,17 @@ const App = () => {
 
   return (
     <div className="App">
+      <header>😀 Sean Todo App</header>
       <AddTodo addItem={addItem} />
-      {todoItems.map((item) => {
-        // console.log(item); // {id: 1, title: 'My Todo1', done: false}
-        return <Todo key={item.id} item={item} deleteItem={deleteItem} />;
-      })}
+      <div className="left-todos">🚀 {todoItems.length} Todos</div>
+      {todoItems.length > 0 ? (
+        todoItems.map((item) => {
+          // console.log(item); // {id: 1, title: 'My Todo1', done: false}
+          return <Todo key={item.id} item={item} deleteItem={deleteItem} />;
+        })
+      ) : (
+        <p className="empty-todos">Todo를 추가해주세요🔥</p>
+      )}
     </div>
   );
 };
